@@ -4,27 +4,28 @@
 #include <iostream>
 
 
-template<typename duration_t>
-class StopWatch{
-    using clock_t = std::chrono::steady_clock;
-    using time_point_t = clock_t::time_point;
+// template<typename duration_t>
+// class StopWatch{
+//     using clock_t = std::chrono::steady_clock;
+//     using time_point_t = clock_t::time_point;
 
-public:
-    StopWatch(): start_time(clock_t::now()) {
-    }
+// public:
+//     StopWatch(): start_time(clock_t::now()) {
+//     }
 
-    duration_t elapsed(){
-        time_point_t current_time = clock_t::now();
-        return std::chrono::duration_cast<duration_t>(current_time - start_time);
-    }
+//     duration_t elapsed(){
+//         time_point_t current_time = clock_t::now();
+//         return std::chrono::duration_cast<duration_t>(current_time - start_time);
+//     }
 
-private:
-    time_point_t start_time;
-    duration_t duration;
-};
+// private:
+//     time_point_t start_time;
+//     duration_t duration;
+// };
 
 template<typename Task/*, typename duration_t = std::chrono::seconds*/>
-class TaskTimer{
+class TaskTimer
+{
     using clock_t = std::chrono::steady_clock;
     using time_point_t = clock_t::time_point;
     using duration_t = std::chrono::seconds; 
@@ -32,23 +33,27 @@ class TaskTimer{
 public:
     TaskTimer(Task task, duration_t duration)
     : task_(std::move(task)),
-      duration_(duration) {
+      duration_(duration) 
+    {
     }
 
-    void start(){
+    void start()
+    {
         std::thread timer_t([self = this](){
             self->cycling();
         });
         timer_t.detach();
     }
 
-    void stop(){
+    void stop()
+    {
         execute_flag = false;
     }
 
 private:
     void cycling(){
-        while(execute_flag){
+        while (execute_flag) 
+        {
             start_time_ = current_time();
             auto current_time_ = current_time();
 
@@ -56,7 +61,8 @@ private:
 
             StopWatch<std::chrono::milliseconds> stop_watch;
 
-            while(passed < duration_){
+            while (passed < duration_)
+            {
                 passed = std::chrono::duration_cast<duration_t>(current_time_ - start_time_);
                 current_time_ = current_time();
             }
@@ -67,18 +73,13 @@ private:
         }
     }
 
-    void start_with_std(){
-        // while(execute_flag){
-        //     std::this_thread::sleep_for(duration_);
-        //     execute();
-        // }
-    }
-
-    void execute(){
+    void execute()
+    {
         task_();
     }
 
-    inline time_point_t current_time() const{
+    inline time_point_t current_time() const
+    {
         return clock_t::now();
     }
 
@@ -108,3 +109,6 @@ int main() {
     test();
     return 0;
 }
+
+// g++ -std=c++17 -O2 -pthread main.cpp
+// g++ -std=c++17 -O2 -pthread -fsanitize=thread main.cpp
